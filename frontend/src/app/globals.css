@@ -1,0 +1,199 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 84% 4.9%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+  }
+  
+  .btn-secondary {
+    @apply bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+  }
+  
+  .btn-danger {
+    @apply bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+  }
+  
+  .input-field {
+    @apply bg-gray-800 border border-gray-600 text-white placeholder-gray-400 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+  }
+  
+  .card {
+    @apply bg-gray-800 border border-gray-700 rounded-lg p-6 shadow-lg;
+  }
+  
+  .audio-meter {
+    @apply bg-gray-700 rounded-full overflow-hidden;
+  }
+  
+  .audio-meter-fill {
+    @apply h-full transition-all duration-100 ease-out;
+  }
+  
+  .waveform-container {
+    @apply bg-gray-800 border border-gray-700 rounded-lg p-4;
+  }
+  
+  .effect-knob {
+    @apply w-16 h-16 bg-gray-700 border-2 border-gray-600 rounded-full flex items-center justify-center cursor-pointer hover:border-blue-500 transition-colors duration-200;
+  }
+  
+  .effect-slider {
+    @apply w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider;
+  }
+  
+  .effect-slider::-webkit-slider-thumb {
+    @apply appearance-none w-6 h-6 bg-blue-500 rounded-full cursor-pointer;
+  }
+  
+  .effect-slider::-moz-range-thumb {
+    @apply w-6 h-6 bg-blue-500 rounded-full cursor-pointer border-none;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent;
+  }
+  
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .audio-visualizer {
+    @apply flex items-end justify-center space-x-1 h-20;
+  }
+  
+  .audio-bar {
+    @apply bg-blue-500 rounded-t-sm transition-all duration-75;
+    width: 4px;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-800;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-600 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-500;
+}
+
+/* Audio waveform styles */
+.waveform {
+  @apply w-full h-32 bg-gray-800 rounded-lg;
+}
+
+.waveform canvas {
+  @apply rounded-lg;
+}
+
+/* Effect panel animations */
+.effect-panel {
+  @apply transform transition-all duration-300 ease-in-out;
+}
+
+.effect-panel:hover {
+  @apply scale-105 shadow-xl;
+}
+
+/* Loading spinner */
+.spinner {
+  @apply animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500;
+}
+
+/* Pulse animation for real-time indicators */
+.pulse-indicator {
+  @apply animate-pulse;
+}
+
+/* Audio level meters */
+.level-meter {
+  @apply relative w-4 h-32 bg-gray-700 rounded-full overflow-hidden;
+}
+
+.level-meter-fill {
+  @apply absolute bottom-0 w-full transition-all duration-100 ease-out;
+}
+
+.level-meter-fill.low {
+  @apply bg-green-500;
+}
+
+.level-meter-fill.medium {
+  @apply bg-yellow-500;
+}
+
+.level-meter-fill.high {
+  @apply bg-red-500;
+}
+
+/* Knob component */
+.knob {
+  @apply relative w-16 h-16 bg-gray-700 border-2 border-gray-600 rounded-full cursor-pointer;
+}
+
+.knob::before {
+  content: '';
+  @apply absolute top-1/2 left-1/2 w-1 h-6 bg-white transform -translate-x-1/2 -translate-y-1/2 origin-bottom;
+}
+
+/* Slider component */
+.slider {
+  @apply appearance-none bg-gray-700 rounded-lg outline-none;
+}
+
+.slider::-webkit-slider-thumb {
+  @apply appearance-none w-6 h-6 bg-blue-500 rounded-full cursor-pointer shadow-lg;
+}
+
+.slider::-moz-range-thumb {
+  @apply w-6 h-6 bg-blue-500 rounded-full cursor-pointer border-none shadow-lg;
+}
