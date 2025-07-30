@@ -1,20 +1,38 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
 import json
 import asyncio
 from typing import List, Dict, Any
 import logging
 from datetime import datetime
 import os
+import numpy as np
+import librosa
 
 from audio_buffer import AudioBuffer
 from audio_processor import AudioProcessor
 from database import get_db, init_db, AsyncSessionLocal
 from models import AudioSession, ProcessingHistory
 
+# Pydantic models for request validation
+class ProcessAudioRequest(BaseModel):
+    effect: str
+    parameters: Dict[str, Any] = {}
+
+class BatchProcessRequest(BaseModel):
+    effects: List[Dict[str, Any]]
+
 # Configure logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler('audio_processing.log')
+    ]
+)
 logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Audio Processing API", version="1.0.0")
@@ -22,9 +40,9 @@ app = FastAPI(title="Audio Processing API", version="1.0.0")
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:3001"],
+    allow_origins=["*"],  # Allow all origins for development
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -52,7 +70,26 @@ async def shutdown_event():
 @app.get("/")
 async def root():
     """Health check endpoint."""
-    return {"message": "Audio Processing API is running", "status": "healthy"}
+    logger.info("Health check requested")
+    return {
+        "message": "David AI Audio Processing API is running", 
+        "status": "healthy",
+        "version": "1.0.0",
+        "active_sessions": len(audio_buffers),
+        "active_processors": len(audio_processors)
+    }
+
+@app.get("/health")
+async def health_check():
+    """Detailed health check endpoint."""
+    logger.info("Detailed health check requested")
+    return {
+        "status": "healthy",
+        "timestamp": datetime.now().isoformat(),
+        "active_sessions": len(audio_buffers),
+        "active_processors": len(audio_processors),
+        "database": "connected" if audio_buffers else "no_sessions"
+    }
 
 @app.get("/api/audio/buffers")
 async def get_buffers():
@@ -65,11 +102,15 @@ async def get_buffers():
 @app.post("/api/audio/session")
 async def create_session(session_name: str = "default"):
     """Create a new audio processing session."""
+    logger.info(f"Creating new session with name: {session_name}")
+    
     session_id = f"session_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+    logger.debug(f"Generated session ID: {session_id}")
     
     # Create new audio buffer and processor
     audio_buffers[session_id] = AudioBuffer(size=44100)  # 1 second at 44.1kHz
     audio_processors[session_id] = AudioProcessor()
+    logger.debug(f"Created audio buffer and processor for session {session_id}")
     
     # Store in database
     try:
@@ -82,10 +123,12 @@ async def create_session(session_name: str = "default"):
             )
             db.add(session)
             await db.commit()
+            logger.info(f"Session {session_id} stored in database successfully")
     except Exception as e:
         logger.error(f"Database error: {e}")
         # Continue without database if there's an error
     
+    logger.info(f"Session {session_id} created successfully")
     return {"session_id": session_id, "name": session_name}
 
 @app.post("/api/audio/{session_id}/write")
@@ -111,9 +154,17 @@ async def read_audio(session_id: str, num_samples: int, amplitude: float = 1.0):
     return {"samples": samples, "available": buffer.available_samples()}
 
 @app.post("/api/audio/{session_id}/process")
-async def process_audio(session_id: str, effect: str, parameters: Dict[str, Any]):
+async def process_audio(session_id: str, request: ProcessAudioRequest):
     """Apply audio effects to the buffer."""
+    logger.info(f"Processing audio for session {session_id} with effect: {request.effect}")
+    logger.debug(f"Effect parameters: {request.parameters}")
+    
     if session_id not in audio_processors:
+        logger.error(f"Session {session_id} not found in audio_processors")
+        raise HTTPException(status_code=404, detail="Session not found")
+    
+    if session_id not in audio_buffers:
+        logger.error(f"Session {session_id} not found in audio_buffers")
         raise HTTPException(status_code=404, detail="Session not found")
     
     processor = audio_processors[session_id]
@@ -121,14 +172,25 @@ async def process_audio(session_id: str, effect: str, parameters: Dict[str, Any]
     
     # Get current samples and apply effect
     available = buffer.available_samples()
+    logger.debug(f"Available samples in buffer: {available}")
+    
     if available == 0:
+        logger.warning(f"No samples available for processing in session {session_id}")
         raise HTTPException(status_code=400, detail="No samples available for processing")
     
     samples = buffer.read(available)
-    processed_samples = processor.apply_effect(samples, effect, parameters)
+    logger.debug(f"Read {len(samples)} samples from buffer")
+    
+    try:
+        processed_samples = processor.apply_effect(samples, request.effect, request.parameters)
+        logger.info(f"Successfully applied {request.effect} effect to {len(processed_samples)} samples")
+    except Exception as e:
+        logger.error(f"Error applying effect {request.effect}: {e}")
+        raise HTTPException(status_code=500, detail=f"Error applying effect: {str(e)}")
     
     # Write processed samples back
     buffer.write(processed_samples)
+    logger.debug(f"Wrote {len(processed_samples)} processed samples back to buffer")
     
     # Log processing history
     try:
@@ -136,17 +198,19 @@ async def process_audio(session_id: str, effect: str, parameters: Dict[str, Any]
         async with AsyncSessionLocal() as db:
             history = ProcessingHistory(
                 session_id=session_id,
-                effect=effect,
-                parameters=json.dumps(parameters),
+                effect=request.effect,
+                parameters=json.dumps(request.parameters),
                 processed_at=datetime.now()
             )
             db.add(history)
             await db.commit()
+            logger.debug(f"Processing history logged to database")
     except Exception as e:
         logger.error(f"Database error in process_audio: {e}")
         # Continue without database logging if there's an error
     
-    return {"processed": len(processed_samples), "effect": effect}
+    logger.info(f"Audio processing completed successfully for session {session_id}")
+    return {"processed": len(processed_samples), "effect": request.effect}
 
 @app.websocket("/ws/audio/{session_id}")
 async def websocket_endpoint(websocket: WebSocket, session_id: str):
@@ -212,30 +276,222 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str):
 @app.post("/api/audio/upload")
 async def upload_audio_file(file: UploadFile = File(...)):
     """Upload and process an audio file."""
+    logger.info(f"Uploading audio file: {file.filename}")
+    
     if not file.filename.endswith(('.wav', '.mp3', '.flac', '.ogg')):
+        logger.error(f"Unsupported audio format: {file.filename}")
         raise HTTPException(status_code=400, detail="Unsupported audio format")
     
     # Save uploaded file
     file_path = f"uploads/{file.filename}"
-    with open(file_path, "wb") as buffer:
-        content = await file.read()
-        buffer.write(content)
+    try:
+        with open(file_path, "wb") as buffer:
+            content = await file.read()
+            buffer.write(content)
+        logger.debug(f"File saved to: {file_path}")
+    except Exception as e:
+        logger.error(f"Error saving file: {e}")
+        raise HTTPException(status_code=500, detail="Error saving file")
     
     # Process the audio file
     processor = AudioProcessor()
-    samples = processor.load_audio_file(file_path)
+    try:
+        samples = processor.load_audio_file(file_path)
+        logger.info(f"Loaded {len(samples)} samples from {file.filename}")
+    except Exception as e:
+        logger.error(f"Error loading audio file: {e}")
+        raise HTTPException(status_code=500, detail="Error loading audio file")
     
     # Create a new session for this file
     session_id = f"file_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
     audio_buffers[session_id] = AudioBuffer(size=len(samples))
-    audio_buffers[session_id].write(samples)
+    audio_processors[session_id] = AudioProcessor()
+    
+    try:
+        audio_buffers[session_id].write(samples)
+        logger.info(f"Created session {session_id} with {len(samples)} samples")
+    except Exception as e:
+        logger.error(f"Error writing samples to buffer: {e}")
+        raise HTTPException(status_code=500, detail="Error processing audio")
+    
+    duration = len(samples) / 44100  # Assuming 44.1kHz sample rate
+    logger.info(f"Audio file processed successfully. Duration: {duration:.2f}s")
     
     return {
         "session_id": session_id,
         "filename": file.filename,
         "samples": len(samples),
-        "duration": len(samples) / 44100  # Assuming 44.1kHz sample rate
+        "duration": duration
     }
+
+@app.post("/api/audio/{session_id}/analyze")
+async def analyze_audio_session(session_id: str):
+    """Analyze audio characteristics for research purposes."""
+    if session_id not in audio_buffers:
+        raise HTTPException(status_code=404, detail="Session not found")
+    
+    buffer = audio_buffers[session_id]
+    available = buffer.available_samples()
+    
+    if available == 0:
+        raise HTTPException(status_code=400, detail="No samples available for analysis")
+    
+    samples = buffer.read(available)
+    processor = audio_processors[session_id]
+    
+    # Basic analysis
+    analysis = processor.analyze_audio(samples)
+    
+    # Advanced feature extraction for AI/ML
+    features = processor.extract_features(samples)
+    
+    # Write samples back to buffer
+    buffer.write(samples)
+    
+    return {
+        "session_id": session_id,
+        "analysis": analysis,
+        "features": features,
+        "samples_analyzed": available
+    }
+
+@app.post("/api/audio/{session_id}/extract-features")
+async def extract_audio_features(session_id: str, feature_type: str = "all"):
+    """Extract specific audio features for machine learning datasets."""
+    if session_id not in audio_buffers:
+        raise HTTPException(status_code=404, detail="Session not found")
+    
+    buffer = audio_buffers[session_id]
+    available = buffer.available_samples()
+    
+    if available == 0:
+        raise HTTPException(status_code=400, detail="No samples available for feature extraction")
+    
+    samples = buffer.read(available)
+    processor = audio_processors[session_id]
+    
+    features = {}
+    
+    if feature_type in ["all", "mfcc"]:
+        # MFCC features for speech recognition
+        mfccs = librosa.feature.mfcc(y=np.array(samples), sr=processor.sample_rate, n_mfcc=13)
+        features["mfcc"] = {
+            "mean": np.mean(mfccs, axis=1).tolist(),
+            "std": np.std(mfccs, axis=1).tolist(),
+            "delta": librosa.feature.delta(mfccs).tolist()
+        }
+    
+    if feature_type in ["all", "spectral"]:
+        # Spectral features
+        spectral_centroids = librosa.feature.spectral_centroid(y=np.array(samples), sr=processor.sample_rate)
+        spectral_rolloff = librosa.feature.spectral_rolloff(y=np.array(samples), sr=processor.sample_rate)
+        spectral_bandwidth = librosa.feature.spectral_bandwidth(y=np.array(samples), sr=processor.sample_rate)
+        
+        features["spectral"] = {
+            "centroids": spectral_centroids.tolist(),
+            "rolloff": spectral_rolloff.tolist(),
+            "bandwidth": spectral_bandwidth.tolist()
+        }
+    
+    if feature_type in ["all", "rhythm"]:
+        # Rhythm and tempo features
+        tempo, beats = librosa.beat.beat_track(y=np.array(samples), sr=processor.sample_rate)
+        features["rhythm"] = {
+            "tempo": float(tempo),
+            "beat_frames": beats.tolist(),
+            "beat_times": librosa.frames_to_time(beats, sr=processor.sample_rate).tolist()
+        }
+    
+    if feature_type in ["all", "chroma"]:
+        # Chroma features for musical analysis
+        chroma = librosa.feature.chroma_stft(y=np.array(samples), sr=processor.sample_rate)
+        features["chroma"] = {
+            "chroma_stft": chroma.tolist(),
+            "chroma_cqt": librosa.feature.chroma_cqt(y=np.array(samples), sr=processor.sample_rate).tolist()
+        }
+    
+    # Write samples back to buffer
+    buffer.write(samples)
+    
+    return {
+        "session_id": session_id,
+        "feature_type": feature_type,
+        "features": features,
+        "samples_processed": available
+    }
+
+@app.post("/api/audio/{session_id}/batch-process")
+async def batch_process_effects(session_id: str, request: BatchProcessRequest):
+    """Apply multiple effects in sequence for batch processing."""
+    if session_id not in audio_processors:
+        raise HTTPException(status_code=404, detail="Session not found")
+    
+    processor = audio_processors[session_id]
+    buffer = audio_buffers[session_id]
+    
+    available = buffer.available_samples()
+    if available == 0:
+        raise HTTPException(status_code=400, detail="No samples available for processing")
+    
+    samples = buffer.read(available)
+    processed_samples = samples
+    applied_effects = []
+    
+    for effect_config in request.effects:
+        effect_name = effect_config.get("effect")
+        parameters = effect_config.get("parameters", {})
+        
+        if effect_name:
+            processed_samples = processor.apply_effect(processed_samples, effect_name, parameters)
+            applied_effects.append(effect_name)
+    
+    # Write processed samples back
+    buffer.write(processed_samples)
+    
+    # Log processing history
+    try:
+        from database import AsyncSessionLocal
+        async with AsyncSessionLocal() as db:
+            for effect in applied_effects:
+                history = ProcessingHistory(
+                    session_id=session_id,
+                    effect=effect,
+                    parameters=json.dumps({"batch_processed": True}),
+                    processed_at=datetime.now()
+                )
+                db.add(history)
+            await db.commit()
+    except Exception as e:
+        logger.error(f"Database error in batch_process: {e}")
+    
+    return {
+        "session_id": session_id,
+        "applied_effects": applied_effects,
+        "samples_processed": len(processed_samples)
+    }
+
+@app.get("/api/audio/sessions")
+async def list_sessions():
+    """List all active audio sessions."""
+    sessions = []
+    for session_id, buffer in audio_buffers.items():
+        status = buffer.get_buffer_status()
+        sessions.append({
+            "session_id": session_id,
+            "buffer_status": status,
+            "has_processor": session_id in audio_processors
+        })
+    return {"sessions": sessions}
+
+@app.delete("/api/audio/{session_id}")
+async def delete_session(session_id: str):
+    """Delete an audio session and clean up resources."""
+    if session_id in audio_buffers:
+        del audio_buffers[session_id]
+    if session_id in audio_processors:
+        del audio_processors[session_id]
+    
+    return {"message": f"Session {session_id} deleted successfully"}
 
 if __name__ == "__main__":
     import uvicorn
