@@ -7,15 +7,6 @@ from enum import Enum
 class EffectType(str, Enum):
     """Supported audio effect types."""
     REVERB = "reverb"
-    DELAY = "delay"
-    DISTORTION = "distortion"
-    FILTER = "filter"
-    COMPRESSION = "compression"
-    CHORUS = "chorus"
-    FLANGER = "flanger"
-    PHASER = "phaser"
-    EQUALIZER = "equalizer"
-    NORMALIZE = "normalize"
 
 
 # Request Models
@@ -94,17 +85,7 @@ class AudioFileResponse(BaseModel):
         from_attributes = True
 
 
-class AudioAnalysisResponse(BaseModel):
-    """Response model for audio analysis results."""
-    session_id: str = Field(..., description="Session identifier")
-    rms_level: float = Field(..., description="RMS level")
-    peak_level: float = Field(..., description="Peak level")
-    dynamic_range: float = Field(..., description="Dynamic range")
-    spectral_centroid: float = Field(..., description="Spectral centroid")
-    spectral_rolloff: float = Field(..., description="Spectral rolloff")
-    zero_crossing_rate: float = Field(..., description="Zero crossing rate")
-    duration: float = Field(..., description="Audio duration")
-    sample_rate: int = Field(..., description="Sample rate")
+
 
 class HealthCheckResponse(BaseModel):
     """Response model for health check endpoint."""

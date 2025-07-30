@@ -20,8 +20,7 @@ from app.core.errors import SessionNotFoundError, AudioProcessingFailedError, Ef
 from app.models.pydantic import (
     CreateSessionRequest, ProcessAudioRequest,
     AudioSessionResponse, BufferStatusResponse, ProcessingResultResponse,
-    AudioFileResponse, AudioAnalysisResponse,
-    HealthCheckResponse, StatisticsResponse
+    AudioFileResponse, HealthCheckResponse, StatisticsResponse
 )
 from app.services.audio_processor import AudioProcessorFactory
 from app.models.db import AudioSession, ProcessingHistory, AudioFile
@@ -390,72 +389,7 @@ async def get_statistics(audio_manager = Depends(get_audio_manager)):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/{session_id}/analyze", response_model=AudioAnalysisResponse)
-async def analyze_audio(
-    session_id: str,
-    buffer_manager = Depends(get_audio_buffer_manager)
-):
-    """Analyze audio characteristics for a session."""
-    try:
-        buffer = buffer_manager.get_buffer(session_id)
-        if not buffer:
-            raise SessionNotFoundError(f"Session {session_id} not found")
-        
-        # Get all samples from buffer
-        samples = buffer.read(buffer.available_samples())
-        if not samples:
-            raise HTTPException(status_code=400, detail="No audio data available for analysis")
-        
-        # Convert to numpy array for analysis
-        samples_array = np.array(samples)
-        
-        # Calculate basic audio characteristics
-        rms_level = np.sqrt(np.mean(samples_array**2))
-        peak_level = np.max(np.abs(samples_array))
-        dynamic_range = 20 * np.log10(peak_level / (rms_level + 1e-10))
-        
-        # Spectral analysis
-        fft = np.fft.fft(samples_array)
-        magnitude_spectrum = np.abs(fft)
-        frequencies = np.fft.fftfreq(len(samples_array), 1/buffer.sample_rate)
-        
-        # Spectral centroid (center of mass of spectrum)
-        positive_freqs = frequencies[:len(frequencies)//2]
-        positive_magnitude = magnitude_spectrum[:len(magnitude_spectrum)//2]
-        spectral_centroid = np.sum(positive_freqs * positive_magnitude) / (np.sum(positive_magnitude) + 1e-10)
-        
-        # Spectral rolloff (frequency below which 85% of energy is contained)
-        cumulative_energy = np.cumsum(positive_magnitude)
-        rolloff_threshold = 0.85 * cumulative_energy[-1]
-        rolloff_index = np.where(cumulative_energy >= rolloff_threshold)[0]
-        spectral_rolloff = positive_freqs[rolloff_index[0]] if len(rolloff_index) > 0 else 0
-        
-        # Zero crossing rate (measure of noisiness)
-        zero_crossings = np.sum(np.diff(np.sign(samples_array)) != 0)
-        zero_crossing_rate = zero_crossings / len(samples_array)
-        
-        # Duration
-        duration = len(samples_array) / buffer.sample_rate
-        
-        logger.info(f"Audio analysis completed for session {session_id}")
-        
-        return AudioAnalysisResponse(
-            session_id=session_id,
-            rms_level=float(rms_level),
-            peak_level=float(peak_level),
-            dynamic_range=float(dynamic_range),
-            spectral_centroid=float(spectral_centroid),
-            spectral_rolloff=float(spectral_rolloff),
-            zero_crossing_rate=float(zero_crossing_rate),
-            duration=float(duration),
-            sample_rate=buffer.sample_rate
-        )
-        
-    except SessionNotFoundError as e:
-        raise HTTPException(status_code=404, detail=str(e))
-    except Exception as e:
-        logger.error(f"Error analyzing audio: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+
 
 
 @router.get("/processed/{session_id}/{effect}")

@@ -18,8 +18,8 @@ export default function Home() {
   const [uploadedFiles, setUploadedFiles] = useState<Array<{name: string, size: number, duration: number}>>([])
   const [isProcessing, setIsProcessing] = useState(false)
   const [activeEffects, setActiveEffects] = useState<string[]>([])
-  const [audioAnalysis, setAudioAnalysis] = useState<any>(null)
-  const [isAnalyzing, setIsAnalyzing] = useState(false)
+  const [processedAudio, setProcessedAudio] = useState<{sessionId: string, effect: string} | null>(null)
+
   const [audioLevels, setAudioLevels] = useState({ level: 0, peak: 0 })
   const [frequencyData, setFrequencyData] = useState<number[]>([])
 
@@ -266,19 +266,11 @@ export default function Home() {
         })
         toast.success(`${effect} effect applied successfully!`)
         
-        // Update the audio analysis with new processing results
-        setAudioAnalysis((prev: any) => ({
-          ...prev,
-          lastProcessedEffect: effect,
-          processedSamples: data.samples_processed,
-          processedFile: data.processed_file_path,
+        // Set processed audio info for the player
+        setProcessedAudio({
           sessionId: data.session_id,
-          processingHistory: [...(prev?.processingHistory || []), {
-            effect,
-            timestamp: new Date().toISOString(),
-            samplesProcessed: data.samples_processed
-          }]
-        }))
+          effect: effect.toLowerCase()
+        })
         
         toast.success(`${effect} effect applied successfully! Listen to the result below.`)
       } else {
@@ -378,64 +370,7 @@ export default function Home() {
     }
   }
 
-  const analyzeAudio = async () => {
-    if (!sessionId) {
-      toast.error('No active session. Please upload a file first.')
-      return
-    }
 
-    setIsAnalyzing(true)
-    
-    try {
-      const response = await fetch(`http://localhost:8000/api/audio/${sessionId}/analyze`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      })
-      
-      if (response.ok) {
-        const data = await response.json()
-        setAudioAnalysis(data)
-        toast.success('Audio analysis completed!')
-        console.log('Audio analysis:', data)
-      } else {
-        throw new Error('Failed to analyze audio')
-      }
-    } catch (error) {
-      console.error('Failed to analyze audio:', error)
-      toast.error('Failed to analyze audio')
-    } finally {
-      setIsAnalyzing(false)
-    }
-  }
-
-  const extractFeatures = async (featureType: string = 'all') => {
-    if (!sessionId) {
-      toast.error('No active session. Please upload a file first.')
-      return
-    }
-
-    setIsAnalyzing(true)
-    
-    try {
-      const response = await fetch(`http://localhost:8000/api/audio/${sessionId}/extract-features?feature_type=${featureType}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      })
-      
-      if (response.ok) {
-        const data = await response.json()
-        toast.success(`${featureType} features extracted successfully!`)
-        console.log('Extracted features:', data)
-      } else {
-        throw new Error('Failed to extract features')
-      }
-    } catch (error) {
-      console.error('Failed to extract features:', error)
-      toast.error('Failed to extract features')
-    } finally {
-      setIsAnalyzing(false)
-    }
-  }
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
@@ -678,41 +613,7 @@ export default function Home() {
                 </div>
               )}
 
-              {/* Analysis Controls */}
-              <div className="mt-4 space-y-3">
-                <button
-                  onClick={analyzeAudio}
-                  disabled={isAnalyzing || !sessionId}
-                  className={`w-full p-3 rounded-lg border border-gray-600 hover:border-gray-500 transition-all duration-200 text-left ${
-                    isAnalyzing ? 'opacity-50 cursor-not-allowed' : ''
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <ChartBarIcon className="h-5 w-5 text-green-500" />
-                      <span className="font-medium">Analyze Audio</span>
-                    </div>
-                    {isAnalyzing && (
-                      <div className="w-4 h-4 border-2 border-green-500 border-t-transparent rounded-full animate-spin"></div>
-                    )}
-                  </div>
-                </button>
 
-                <div className="grid grid-cols-2 gap-2">
-                  {['mfcc', 'spectral', 'rhythm', 'chroma'].map((featureType) => (
-                    <button
-                      key={featureType}
-                      onClick={() => extractFeatures(featureType)}
-                      disabled={isAnalyzing || !sessionId}
-                      className={`p-2 rounded-lg border border-gray-600 hover:border-gray-500 transition-all duration-200 text-xs ${
-                        isAnalyzing ? 'opacity-50 cursor-not-allowed' : ''
-                      }`}
-                    >
-                      {featureType.charAt(0).toUpperCase() + featureType.slice(1)}
-                    </button>
-                  ))}
-                </div>
-              </div>
 
               {/* Processing Results */}
               {activeEffects.length > 0 && (
@@ -726,11 +627,10 @@ export default function Home() {
                 </div>
               )}
 
-              {/* Processed Audio Player */}
-              {audioAnalysis?.processedFile && audioAnalysis?.lastProcessedEffect && (
+              {processedAudio && (
                 <div className="mt-4 p-3 bg-purple-500/10 border border-purple-500/20 rounded-lg">
                   <h4 className="text-sm font-medium text-purple-400 mb-3">
-                    🎵 Processed Audio: {audioAnalysis.lastProcessedEffect}
+                    🎵 Processed Audio: {processedAudio.effect}
                   </h4>
                   
                   <div className="space-y-3">
@@ -739,7 +639,7 @@ export default function Home() {
                       <audio 
                         controls 
                         className="flex-1"
-                        src={`http://localhost:8000/api/audio/processed/${audioAnalysis.sessionId}/${audioAnalysis.lastProcessedEffect.toLowerCase()}`}
+                        src={`http://localhost:8000/api/audio/processed/${processedAudio.sessionId}/${processedAudio.effect}`}
                       >
                         Your browser does not support the audio element.
                       </audio>
@@ -747,6 +647,8 @@ export default function Home() {
                   </div>
                 </div>
               )}
+
+
 
               {/* Connection Status */}
               {!sessionId && (
