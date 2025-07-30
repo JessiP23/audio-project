@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import {
   PlayIcon, PauseIcon, StopIcon, SpeakerWaveIcon,
-  SpeakerXMarkIcon, MusicalNoteIcon, Cog6ToothIcon, ChartBarIcon
+  SpeakerXMarkIcon, MusicalNoteIcon
 } from '@heroicons/react/24/solid'
 import toast from 'react-hot-toast'
 
@@ -344,57 +344,8 @@ export default function Home() {
     toast.success(`${effect} effect removed`)
   }
 
-  const playProcessedAudio = async (sessionId: string, effect: string) => {
-    try {
-      const audioUrl = `http://localhost:8000/api/audio/processed/${sessionId}/${effect.toLowerCase()}`
-      console.log(`🎵 Playing processed audio: ${audioUrl}`)
-      
-      // Create a new audio element for the processed audio
-      const audio = new Audio(audioUrl)
-      audio.volume = volume
-      
-      audio.onloadeddata = () => {
-        console.log(`✅ Processed audio loaded: ${effect}`)
-        toast.success(`Playing ${effect} processed audio`)
-      }
-      
-      audio.onerror = (error) => {
-        console.error(`❌ Error playing processed audio:`, error)
-        toast.error(`Error playing ${effect} audio`)
-      }
-      
-      await audio.play()
-    } catch (error) {
-      console.error(`❌ Error playing processed audio:`, error)
-      toast.error(`Error playing ${effect} audio`)
-    }
-  }
-
-
-
   return (
     <div className="min-h-screen bg-gray-900 text-white">
-      {/* Header */}
-      <header className="bg-gray-800 border-b border-gray-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-                                    <div className="flex items-center space-x-4">
-                          <MusicalNoteIcon className="h-8 w-8 text-blue-500" />
-                          <h1 className="text-xl font-bold text-gradient">David AI Audio Research Studio</h1>
-                        </div>
-            <div className="flex items-center space-x-4">
-              <button className="btn-secondary flex items-center space-x-2">
-                <Cog6ToothIcon className="h-5 w-5" />
-                <span>Settings</span>
-              </button>
-              <button className="btn-secondary flex items-center space-x-2">
-                <ChartBarIcon className="h-5 w-5" />
-                <span>Analytics</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
