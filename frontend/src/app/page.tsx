@@ -193,8 +193,9 @@ export default function Home() {
       if (response.ok) {
         const data = await response.json()
         console.log('✅ File upload successful:', data)
+        console.log('📋 Session ID set to:', data.file_id)
         
-        setSessionId(data.session_id)
+        setSessionId(data.file_id)
         
         // Add file to uploaded files list
         setUploadedFiles(prev => [...prev, {
@@ -224,6 +225,7 @@ export default function Home() {
 
   const applyAudioEffect = async (effect: string) => {
     console.log(`🎵 Applying ${effect} effect to session: ${sessionId}`)
+    console.log(`🔍 Session ID type: ${typeof sessionId}, value: "${sessionId}"`)
     
     if (!sessionId) {
       console.error('❌ No active session found')
@@ -257,19 +259,24 @@ export default function Home() {
       if (response.ok) {
         const data = await response.json()
         console.log(`✅ Successfully applied ${effect}:`, data)
+        console.log(`📊 Response data structure:`, {
+          samples_processed: data.samples_processed,
+          processed_file_path: data.processed_file_path,
+          session_id: data.session_id
+        })
         toast.success(`${effect} effect applied successfully!`)
         
         // Update the audio analysis with new processing results
         setAudioAnalysis((prev: any) => ({
           ...prev,
           lastProcessedEffect: effect,
-          processedSamples: data.processed,
-          processedFile: data.processed_file,
+          processedSamples: data.samples_processed,
+          processedFile: data.processed_file_path,
           sessionId: data.session_id,
           processingHistory: [...(prev?.processingHistory || []), {
             effect,
             timestamp: new Date().toISOString(),
-            samplesProcessed: data.processed
+            samplesProcessed: data.samples_processed
           }]
         }))
         
@@ -293,26 +300,47 @@ export default function Home() {
     
     switch (effect.toLowerCase()) {
       case 'reverb':
-        params.room_size = 0.5
-        params.damping = 0.5
+        params.room_size = 0.8  // Increased from 0.5
+        params.damping = 0.2    // Decreased from 0.5 for more echo
+        params.wet_level = 0.7  // Added wet/dry mix
         break
       case 'delay':
-        params.delay_time = 0.3
-        params.feedback = 0.3
+        params.delay_time = 0.5  // Increased from 0.3
+        params.feedback = 0.6    // Increased from 0.3
+        params.wet_level = 0.8   // Added wet/dry mix
         break
       case 'distortion':
-        params.drive = 0.5
+        params.drive = 0.8       // Increased from 0.5
+        params.tone = 0.6        // Added tone control
         break
       case 'filter':
-        params.cutoff = 1000
-        params.resonance = 0.5
+        params.cutoff = 2000     // Increased from 1000
+        params.resonance = 0.8   // Increased from 0.5
+        params.filter_type = 'lowpass' // Added filter type
         break
       case 'compression':
-        params.threshold = -20
-        params.ratio = 4
+        params.threshold = -15   // Increased from -20
+        params.ratio = 8         // Increased from 4
+        params.attack = 0.01     // Added attack time
+        params.release = 0.1     // Added release time
         break
       case 'normalize':
-        params.target_level = -1.0
+        params.target_level = -3.0  // Increased from -1.0
+        break
+      case 'chorus':
+        params.rate = 1.5        // Chorus rate
+        params.depth = 0.7       // Chorus depth
+        params.mix = 0.6         // Chorus mix
+        break
+      case 'flanger':
+        params.rate = 0.5        // Flanger rate
+        params.depth = 0.8       // Flanger depth
+        params.feedback = 0.3    // Flanger feedback
+        break
+      case 'phaser':
+        params.rate = 0.8        // Phaser rate
+        params.depth = 0.9       // Phaser depth
+        params.feedback = 0.4    // Phaser feedback
         break
     }
     
@@ -326,7 +354,7 @@ export default function Home() {
 
   const playProcessedAudio = async (sessionId: string, effect: string) => {
     try {
-      const audioUrl = `http://localhost:8000/api/audio/processed/${sessionId}/${effect}`
+      const audioUrl = `http://localhost:8000/api/audio/processed/${sessionId}/${effect.toLowerCase()}`
       console.log(`🎵 Playing processed audio: ${audioUrl}`)
       
       // Create a new audio element for the processed audio
@@ -589,75 +617,6 @@ export default function Home() {
                 </div>
               </div>
             </motion.div>
-
-            {/* Audio Visualizer Placeholder */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              className="card"
-            >
-              <div className="mb-4">
-                <h3 className="text-lg font-semibold mb-2">Audio Visualizer</h3>
-                <div className="flex items-center justify-between text-sm">
-                  <span>Real-time frequency spectrum</span>
-                  <div className="flex items-center space-x-4">
-                    <div className="flex items-center space-x-2">
-                      <span className="text-gray-400">Level:</span>
-                      <span className={`${audioLevels.level > 50 ? 'text-red-500' : audioLevels.level > 20 ? 'text-yellow-500' : 'text-green-500'}`}>
-                        {audioLevels.level.toFixed(1)}%
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-gray-400">Peak:</span>
-                      <span className={`${audioLevels.peak > 80 ? 'text-red-500' : audioLevels.peak > 50 ? 'text-yellow-500' : 'text-green-500'}`}>
-                        {audioLevels.peak.toFixed(1)}%
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="relative">
-                <div className="w-full h-32 bg-gray-800 rounded-lg border border-gray-700 p-4">
-                  {isPlaying && frequencyData.length > 0 ? (
-                    <div className="flex items-end justify-between h-full space-x-1">
-                      {frequencyData.slice(0, 32).map((value, index) => {
-                        const height = (value / 255) * 100
-                        const color = height > 80 ? 'bg-red-500' : height > 50 ? 'bg-yellow-500' : 'bg-green-500'
-                        return (
-                          <div
-                            key={index}
-                            className={`w-2 ${color} rounded-t transition-all duration-75`}
-                            style={{ height: `${Math.max(2, height)}%` }}
-                          />
-                        )
-                      })}
-                    </div>
-                  ) : (
-                    <div className="text-center h-full flex items-center justify-center">
-                      <div>
-                        <div className="text-gray-400 text-sm mb-2">
-                          {isPlaying ? 'Processing audio...' : 'No audio playing'}
-                        </div>
-                        <div className="flex items-center justify-center space-x-1">
-                          {[...Array(8)].map((_, i) => (
-                            <div
-                              key={i}
-                              className="w-1 h-8 bg-gray-600 rounded-full animate-pulse"
-                              style={{
-                                animationDelay: `${i * 0.1}s`,
-                                animationDuration: '1s',
-                              }}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </motion.div>
           </div>
 
           {/* Effects Panel */}
@@ -793,7 +752,7 @@ export default function Home() {
                       <div className="space-y-1 max-h-20 overflow-y-auto">
                         {audioAnalysis.processingHistory.slice(-3).map((item: any, index: number) => (
                           <div key={index} className="text-xs text-gray-400">
-                            {item.effect} - {item.samplesProcessed.toLocaleString()} samples
+                            {item.effect} - {(item.samplesProcessed || 0).toLocaleString()} samples
                           </div>
                         ))}
                       </div>
@@ -815,7 +774,7 @@ export default function Home() {
                       <audio 
                         controls 
                         className="flex-1"
-                        src={`http://localhost:8000/api/audio/processed/${audioAnalysis.sessionId}/${audioAnalysis.lastProcessedEffect}`}
+                        src={`http://localhost:8000/api/audio/processed/${audioAnalysis.sessionId}/${audioAnalysis.lastProcessedEffect.toLowerCase()}`}
                       >
                         Your browser does not support the audio element.
                       </audio>
@@ -833,24 +792,17 @@ export default function Home() {
                     <div className="flex items-center justify-between">
                       <div className="text-xs text-gray-400">
                         <div>Effect: {audioAnalysis.lastProcessedEffect}</div>
-                        <div>Samples: {audioAnalysis.processedSamples?.toLocaleString()}</div>
+                        <div>Samples: {(audioAnalysis.processedSamples || 0).toLocaleString()}</div>
                         <div>File: {audioAnalysis.processedFile}</div>
                       </div>
                       
                       <a 
-                        href={`http://localhost:8000/api/audio/processed/${audioAnalysis.sessionId}/${audioAnalysis.lastProcessedEffect}`}
+                        href={`http://localhost:8000/api/audio/processed/${audioAnalysis.sessionId}/${audioAnalysis.lastProcessedEffect.toLowerCase()}`}
                         download={`processed_${audioAnalysis.lastProcessedEffect}.wav`}
                         className="px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white text-xs rounded-lg transition-colors duration-200"
                       >
                         Download
                       </a>
-                    </div>
-                    
-                    {/* Waveform Visualization Placeholder */}
-                    <div className="h-16 bg-gray-800 rounded-lg border border-gray-700 flex items-center justify-center">
-                      <div className="text-xs text-gray-500">
-                        Waveform visualization for {audioAnalysis.lastProcessedEffect} effect
-                      </div>
                     </div>
                   </div>
                 </div>
