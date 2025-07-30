@@ -50,7 +50,7 @@ class AVLAudioTree:
         self.file_count = 0
         self.total_size = 0
         self.cache: Dict[str, AudioFileNode] = {}
-        self.cache_size = 1000  # LRU cache size
+        self.cache_size = 1000
         
     def _height(self, node: Optional[AudioFileNode]) -> int:
         """Get height of a node."""
@@ -95,7 +95,6 @@ class AVLAudioTree:
     def _balance(self, node: AudioFileNode) -> AudioFileNode:
         """Balance the AVL tree."""
         self._update_height(node)
-        
         balance = self._balance_factor(node)
         
         # Left Left Case
@@ -127,7 +126,6 @@ class AVLAudioTree:
         # Update cache
         self.cache[audio_file.file_id] = audio_file
         if len(self.cache) > self.cache_size:
-            # Remove oldest entry (simple LRU)
             oldest_key = next(iter(self.cache))
             del self.cache[oldest_key]
     
@@ -160,7 +158,6 @@ class AVLAudioTree:
         # Search in tree
         node = self._find_recursive(self.root, file_id)
         if node:
-            # Update cache
             self.cache[file_id] = node
             if len(self.cache) > self.cache_size:
                 oldest_key = next(iter(self.cache))

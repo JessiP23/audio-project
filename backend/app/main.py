@@ -47,7 +47,7 @@ app.mount("/uploads", StaticFiles(directory=settings.uploads_dir), name="uploads
 # Include routers
 app.include_router(audio.router)
 
-# WebSocket connections
+# WebSocket connections (for future real-time features)
 active_connections: list[WebSocket] = []
 
 
@@ -130,7 +130,7 @@ async def health_check():
 
 @app.websocket("/ws/audio/{session_id}")
 async def websocket_endpoint(websocket: WebSocket, session_id: str):
-    """WebSocket endpoint for real-time audio streaming."""
+    """WebSocket endpoint for real-time audio streaming (placeholder for future features)."""
     await websocket.accept()
     active_connections.append(websocket)
     
@@ -138,37 +138,19 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str):
         logger.info(f"WebSocket connected for session: {session_id}")
         
         while True:
-            # Receive message from client
             data = await websocket.receive_text()
             message = json.loads(data)
             
-            if message["type"] == "audio_data":
-                # Handle audio data
-                samples = message["samples"]
-                # TODO: Process audio data in real-time
-                await websocket.send_text(json.dumps({
-                    "type": "audio_received",
-                    "samples_count": len(samples),
-                    "session_id": session_id
-                }))
-                
-            elif message["type"] == "effect_request":
-                # Handle effect request
-                effect = message["effect"]
-                parameters = message.get("parameters", {})
-                
-                # TODO: Apply effect in real-time
-                await websocket.send_text(json.dumps({
-                    "type": "effect_applied",
-                    "effect": effect,
-                    "session_id": session_id
-                }))
-                
-            elif message["type"] == "ping":
-                # Handle ping
+            if message["type"] == "ping":
                 await websocket.send_text(json.dumps({
                     "type": "pong",
                     "timestamp": datetime.now().isoformat()
+                }))
+            else:
+                # Placeholder for future real-time features
+                await websocket.send_text(json.dumps({
+                    "type": "not_implemented",
+                    "message": "Feature not yet implemented"
                 }))
     
     except WebSocketDisconnect:

@@ -634,7 +634,7 @@ export default function Home() {
 
               {/* Effects Grid */}
               <div className="grid grid-cols-2 gap-3 mb-6">
-                {['Reverb', 'Delay', 'Distortion', 'Filter', 'Compression', 'Normalize'].map((effect) => (
+                {['Reverb'].map((effect) => (
                   <button
                     key={effect}
                     onClick={() => applyAudioEffect(effect)}

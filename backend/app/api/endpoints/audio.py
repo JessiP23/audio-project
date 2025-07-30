@@ -184,13 +184,9 @@ async def process_audio(
 ):
     """Apply audio effects to the buffer."""
     try:
-        logger.info(f"Processing audio for session: {session_id}")
-        
         buffer = buffer_manager.get_buffer(session_id)
         if not buffer:
-            logger.error(f"Buffer not found for session: {session_id}")
             raise SessionNotFoundError(f"Session {session_id} not found")
-        logger.info(f"Found buffer for session: {session_id}, available samples: {buffer.available_samples()}")
         
         # Get current samples
         available = buffer.available_samples()
@@ -303,9 +299,6 @@ async def upload_audio_file(
             )
             db.add(db_session)
             await db.commit()
-            logger.info(f"Created new session: {session_id}")
-        else:
-            logger.info(f"Using existing session: {session_id}")
         
         # Create buffer and write samples
         buffer = buffer_manager.create_buffer(

@@ -46,18 +46,11 @@ async def get_audio_buffer_manager() -> AudioBufferManager:
     global _buffer_manager
     if _buffer_manager is None:
         _buffer_manager = AudioBufferManager()
-        logger.info("Created new global buffer manager instance")
-    else:
-        logger.debug("Reusing existing global buffer manager instance")
     return _buffer_manager
 
 
 def get_current_user_id() -> Optional[str]:
-    """
-    Get current user ID from request context.
-    Placeholder for future authentication implementation.
-    """
-    # TODO: Implement proper authentication
+    """Get current user ID from request context (placeholder for future authentication)."""
     return "default_user"
 
 
