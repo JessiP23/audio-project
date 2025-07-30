@@ -714,21 +714,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Analysis Results */}
-              {audioAnalysis && (
-                <div className="mt-4 p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
-                  <h4 className="text-sm font-medium text-green-400 mb-2">Analysis Results</h4>
-                  <div className="text-xs text-gray-400 space-y-1">
-                    <div>RMS: {audioAnalysis.analysis?.rms?.toFixed(4)}</div>
-                    <div>Peak: {audioAnalysis.analysis?.peak?.toFixed(4)}</div>
-                    <div>Duration: {audioAnalysis.analysis?.duration?.toFixed(2)}s</div>
-                    <div>Tempo: {audioAnalysis.features?.tempo?.toFixed(1)} BPM</div>
-                    <div>Spectral Centroid: {audioAnalysis.analysis?.spectral_centroid?.toFixed(1)} Hz</div>
-                    <div>Zero Crossing Rate: {audioAnalysis.analysis?.zero_crossing_rate?.toFixed(4)}</div>
-                  </div>
-                </div>
-              )}
-
               {/* Processing Results */}
               {activeEffects.length > 0 && (
                 <div className="mt-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
@@ -737,27 +722,7 @@ export default function Home() {
                     <div>Applied Effects: {activeEffects.join(', ')}</div>
                     <div>Session ID: {sessionId}</div>
                     <div>Status: {isProcessing ? 'Processing...' : 'Ready'}</div>
-                    {audioAnalysis?.lastProcessedEffect && (
-                      <div>Last Effect: {audioAnalysis.lastProcessedEffect}</div>
-                    )}
-                    {audioAnalysis?.processedSamples && (
-                      <div>Samples Processed: {audioAnalysis.processedSamples.toLocaleString()}</div>
-                    )}
                   </div>
-                  
-                  {/* Processing History */}
-                  {audioAnalysis?.processingHistory && audioAnalysis.processingHistory.length > 0 && (
-                    <div className="mt-3">
-                      <h5 className="text-xs font-medium text-blue-300 mb-1">Processing History:</h5>
-                      <div className="space-y-1 max-h-20 overflow-y-auto">
-                        {audioAnalysis.processingHistory.slice(-3).map((item: any, index: number) => (
-                          <div key={index} className="text-xs text-gray-400">
-                            {item.effect} - {(item.samplesProcessed || 0).toLocaleString()} samples
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
                 </div>
               )}
 
@@ -778,31 +743,6 @@ export default function Home() {
                       >
                         Your browser does not support the audio element.
                       </audio>
-                      
-                      <button
-                        onClick={() => playProcessedAudio(audioAnalysis.sessionId, audioAnalysis.lastProcessedEffect)}
-                        className="px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors duration-200"
-                        title="Play with Web Audio API"
-                      >
-                        <PlayIcon className="h-4 w-4" />
-                      </button>
-                    </div>
-                    
-                    {/* Download Link */}
-                    <div className="flex items-center justify-between">
-                      <div className="text-xs text-gray-400">
-                        <div>Effect: {audioAnalysis.lastProcessedEffect}</div>
-                        <div>Samples: {(audioAnalysis.processedSamples || 0).toLocaleString()}</div>
-                        <div>File: {audioAnalysis.processedFile}</div>
-                      </div>
-                      
-                      <a 
-                        href={`http://localhost:8000/api/audio/processed/${audioAnalysis.sessionId}/${audioAnalysis.lastProcessedEffect.toLowerCase()}`}
-                        download={`processed_${audioAnalysis.lastProcessedEffect}.wav`}
-                        className="px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white text-xs rounded-lg transition-colors duration-200"
-                      >
-                        Download
-                      </a>
                     </div>
                   </div>
                 </div>
