@@ -28,7 +28,7 @@ Base = declarative_base()
 # Metadata for migrations
 metadata = MetaData()
 
-async def get_db() -> AsyncGenerator[AsyncSession, None]:
+async def get_db():
     """Dependency to get database session."""
     async with AsyncSessionLocal() as session:
         try:

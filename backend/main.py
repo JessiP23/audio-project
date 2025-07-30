@@ -10,7 +10,7 @@ import os
 
 from audio_buffer import AudioBuffer
 from audio_processor import AudioProcessor
-from database import get_db, init_db
+from database import get_db, init_db, AsyncSessionLocal
 from models import AudioSession, ProcessingHistory
 
 # Configure logging
@@ -72,14 +72,19 @@ async def create_session(session_name: str = "default"):
     audio_processors[session_id] = AudioProcessor()
     
     # Store in database
-    async with get_db() as db:
-        session = AudioSession(
-            session_id=session_id,
-            name=session_name,
-            created_at=datetime.now()
-        )
-        db.add(session)
-        await db.commit()
+    try:
+        from database import AsyncSessionLocal
+        async with AsyncSessionLocal() as db:
+            session = AudioSession(
+                session_id=session_id,
+                name=session_name,
+                created_at=datetime.now()
+            )
+            db.add(session)
+            await db.commit()
+    except Exception as e:
+        logger.error(f"Database error: {e}")
+        # Continue without database if there's an error
     
     return {"session_id": session_id, "name": session_name}
 
@@ -126,15 +131,20 @@ async def process_audio(session_id: str, effect: str, parameters: Dict[str, Any]
     buffer.write(processed_samples)
     
     # Log processing history
-    async with get_db() as db:
-        history = ProcessingHistory(
-            session_id=session_id,
-            effect=effect,
-            parameters=json.dumps(parameters),
-            processed_at=datetime.now()
-        )
-        db.add(history)
-        await db.commit()
+    try:
+        from database import AsyncSessionLocal
+        async with AsyncSessionLocal() as db:
+            history = ProcessingHistory(
+                session_id=session_id,
+                effect=effect,
+                parameters=json.dumps(parameters),
+                processed_at=datetime.now()
+            )
+            db.add(history)
+            await db.commit()
+    except Exception as e:
+        logger.error(f"Database error in process_audio: {e}")
+        # Continue without database logging if there's an error
     
     return {"processed": len(processed_samples), "effect": effect}
 

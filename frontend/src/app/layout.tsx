@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Inter, JetBrains_Mono } from 'next/font/google'
 import './globals.css'
 import { Toaster } from 'react-hot-toast'
@@ -18,7 +18,11 @@ export const metadata: Metadata = {
   description: 'Real-time audio processing with advanced effects and analysis',
   keywords: ['audio', 'processing', 'effects', 'music', 'studio'],
   authors: [{ name: 'Audio Processing Team' }],
-  viewport: 'width=device-width, initial-scale=1',
+}
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
 }
 
 export default function RootLayout({
