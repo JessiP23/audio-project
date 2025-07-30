@@ -1,8 +1,3 @@
-"""
-Pydantic schemas for the Audio Processing Backend.
-Defines request and response models for API validation.
-"""
-
 from pydantic import BaseModel, Field, validator
 from typing import List, Dict, Any, Optional
 from datetime import datetime
@@ -44,25 +39,6 @@ class ProcessAudioRequest(BaseModel):
     """Request model for processing audio with effects."""
     effect: EffectType = Field(..., description="Audio effect to apply")
     parameters: Dict[str, Any] = Field(default_factory=dict, description="Effect parameters")
-
-
-class BatchProcessRequest(BaseModel):
-    """Request model for batch processing multiple effects."""
-    effects: List[ProcessAudioRequest] = Field(..., min_items=1, max_items=10, description="List of effects to apply")
-
-
-class UploadAudioRequest(BaseModel):
-    """Request model for audio file upload metadata."""
-    tags: Optional[List[str]] = Field(default_factory=list, description="Audio file tags")
-    metadata: Optional[Dict[str, Any]] = Field(default_factory=dict, description="Additional metadata")
-
-
-class SearchFilesRequest(BaseModel):
-    """Request model for searching audio files."""
-    query: Optional[str] = Field(default="", description="Search query")
-    tags: Optional[List[str]] = Field(default_factory=list, description="Filter by tags")
-    limit: Optional[int] = Field(default=100, ge=1, le=1000, description="Maximum number of results")
-
 
 # Response Models
 class AudioSessionResponse(BaseModel):
@@ -130,20 +106,6 @@ class AudioAnalysisResponse(BaseModel):
     duration: float = Field(..., description="Audio duration")
     sample_rate: int = Field(..., description="Sample rate")
 
-
-class AudioFeaturesResponse(BaseModel):
-    """Response model for extracted audio features."""
-    session_id: str = Field(..., description="Session identifier")
-    mfcc_mean: List[float] = Field(..., description="MFCC mean values")
-    mfcc_std: List[float] = Field(..., description="MFCC standard deviation values")
-    chroma_mean: List[float] = Field(..., description="Chroma mean values")
-    spectral_centroids_mean: float = Field(..., description="Mean spectral centroids")
-    spectral_rolloff_mean: float = Field(..., description="Mean spectral rolloff")
-    tempo: float = Field(..., description="Detected tempo")
-    harmonic_ratio: float = Field(..., description="Harmonic to percussive ratio")
-    duration: float = Field(..., description="Audio duration")
-
-
 class HealthCheckResponse(BaseModel):
     """Response model for health check endpoint."""
     status: str = Field(..., description="Service status")
@@ -161,47 +123,3 @@ class StatisticsResponse(BaseModel):
     tree_height: int = Field(..., description="AVL tree height")
     average_file_size: float = Field(..., description="Average file size in bytes")
     storage_path: str = Field(..., description="Storage directory path")
-
-
-class ErrorResponse(BaseModel):
-    """Response model for error messages."""
-    error: Dict[str, Any] = Field(..., description="Error information")
-
-
-# WebSocket Models
-class WebSocketMessage(BaseModel):
-    """Base model for WebSocket messages."""
-    type: str = Field(..., description="Message type")
-
-
-class AudioDataMessage(WebSocketMessage):
-    """WebSocket message for audio data."""
-    type: str = Field(default="audio_data", description="Message type")
-    samples: List[float] = Field(..., description="Audio samples")
-
-
-class EffectRequestMessage(WebSocketMessage):
-    """WebSocket message for effect requests."""
-    type: str = Field(default="effect_request", description="Message type")
-    effect: str = Field(..., description="Effect to apply")
-    parameters: Dict[str, Any] = Field(default_factory=dict, description="Effect parameters")
-
-
-class BufferStatusMessage(WebSocketMessage):
-    """WebSocket message for buffer status updates."""
-    type: str = Field(default="buffer_status", description="Message type")
-    status: BufferStatusResponse = Field(..., description="Buffer status")
-    written: int = Field(..., description="Number of samples written")
-
-
-class ProcessedAudioMessage(WebSocketMessage):
-    """WebSocket message for processed audio data."""
-    type: str = Field(default="processed_audio", description="Message type")
-    samples: List[float] = Field(..., description="Processed audio samples")
-
-
-class EffectAppliedMessage(WebSocketMessage):
-    """WebSocket message for effect application confirmation."""
-    type: str = Field(default="effect_applied", description="Message type")
-    effect: str = Field(..., description="Applied effect")
-    processed_samples: int = Field(..., description="Number of processed samples") 

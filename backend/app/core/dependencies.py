@@ -32,14 +32,12 @@ async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
         finally:
             await session.close()
 
-
 async def get_audio_manager() -> AudioFileManager:
     """Dependency to get audio file manager."""
     global _audio_manager
     if _audio_manager is None:
         _audio_manager = AudioFileManager()
     return _audio_manager
-
 
 async def get_audio_buffer_manager() -> AudioBufferManager:
     """Dependency to get audio buffer manager."""

@@ -195,7 +195,7 @@
         "samples": 281856
       },
       "processing_history": [],
-      "height": 3,
+      "height": 4,
       "left": {
         "file_id": "561ffc8b0bb32a33",
         "filename": "sample-6s.wav",
@@ -329,7 +329,7 @@
           "samples": 281856
         },
         "processing_history": [],
-        "height": 2,
+        "height": 3,
         "left": {
           "file_id": "76166eca28711845",
           "filename": "sample-3s.wav",
@@ -361,7 +361,67 @@
           "left": null,
           "right": null
         },
-        "right": null
+        "right": {
+          "file_id": "b46824ada1ccd79a",
+          "filename": "sample-6s.wav",
+          "file_path": "uploads/sample-6s.wav",
+          "file_size": 1127468,
+          "duration": 6.391292517006803,
+          "sample_rate": 44100,
+          "channels": 1,
+          "bit_depth": 16,
+          "format": "wav",
+          "upload_time": "2025-07-30T11:31:49.188108",
+          "last_accessed": "2025-07-30T11:31:49.188109",
+          "access_count": 1,
+          "tags": [
+            "uploaded"
+          ],
+          "metadata": {
+            "duration": 6.391292517006803,
+            "sample_rate": 44100,
+            "channels": 1,
+            "format": "wav",
+            "tags": [
+              "uploaded"
+            ],
+            "samples": 281856
+          },
+          "processing_history": [],
+          "height": 2,
+          "left": {
+            "file_id": "aedf2cbf9fbd33a7",
+            "filename": "sample-6s.wav",
+            "file_path": "uploads/sample-6s.wav",
+            "file_size": 1127468,
+            "duration": 6.391292517006803,
+            "sample_rate": 44100,
+            "channels": 1,
+            "bit_depth": 16,
+            "format": "wav",
+            "upload_time": "2025-07-30T13:08:34.026800",
+            "last_accessed": "2025-07-30T13:08:34.026801",
+            "access_count": 1,
+            "tags": [
+              "uploaded"
+            ],
+            "metadata": {
+              "duration": 6.391292517006803,
+              "sample_rate": 44100,
+              "channels": 1,
+              "format": "wav",
+              "tags": [
+                "uploaded"
+              ],
+              "samples": 281856
+            },
+            "processing_history": [],
+            "height": 1,
+            "left": null,
+            "right": null
+          },
+          "right": null
+        }
       }
     },
     {
@@ -422,7 +482,7 @@
         "samples": 281856
       },
       "processing_history": [],
-      "height": 2,
+      "height": 3,
       "left": {
         "file_id": "76166eca28711845",
         "filename": "sample-3s.wav",
@@ -454,6 +514,97 @@
         "left": null,
         "right": null
       },
+      "right": {
+        "file_id": "b46824ada1ccd79a",
+        "filename": "sample-6s.wav",
+        "file_path": "uploads/sample-6s.wav",
+        "file_size": 1127468,
+        "duration": 6.391292517006803,
+        "sample_rate": 44100,
+        "channels": 1,
+        "bit_depth": 16,
+        "format": "wav",
+        "upload_time": "2025-07-30T11:31:49.188108",
+        "last_accessed": "2025-07-30T11:31:49.188109",
+        "access_count": 1,
+        "tags": [
+          "uploaded"
+        ],
+        "metadata": {
+          "duration": 6.391292517006803,
+          "sample_rate": 44100,
+          "channels": 1,
+          "format": "wav",
+          "tags": [
+            "uploaded"
+          ],
+          "samples": 281856
+        },
+        "processing_history": [],
+        "height": 2,
+        "left": {
+          "file_id": "aedf2cbf9fbd33a7",
+          "filename": "sample-6s.wav",
+          "file_path": "uploads/sample-6s.wav",
+          "file_size": 1127468,
+          "duration": 6.391292517006803,
+          "sample_rate": 44100,
+          "channels": 1,
+          "bit_depth": 16,
+          "format": "wav",
+          "upload_time": "2025-07-30T13:08:34.026800",
+          "last_accessed": "2025-07-30T13:08:34.026801",
+          "access_count": 1,
+          "tags": [
+            "uploaded"
+          ],
+          "metadata": {
+            "duration": 6.391292517006803,
+            "sample_rate": 44100,
+            "channels": 1,
+            "format": "wav",
+            "tags": [
+              "uploaded"
+            ],
+            "samples": 281856
+          },
+          "processing_history": [],
+          "height": 1,
+          "left": null,
+          "right": null
+        },
+        "right": null
+      }
+    },
+    {
+      "file_id": "aedf2cbf9fbd33a7",
+      "filename": "sample-6s.wav",
+      "file_path": "uploads/sample-6s.wav",
+      "file_size": 1127468,
+      "duration": 6.391292517006803,
+      "sample_rate": 44100,
+      "channels": 1,
+      "bit_depth": 16,
+      "format": "wav",
+      "upload_time": "2025-07-30T13:08:34.026800",
+      "last_accessed": "2025-07-30T13:08:34.026801",
+      "access_count": 1,
+      "tags": [
+        "uploaded"
+      ],
+      "metadata": {
+        "duration": 6.391292517006803,
+        "sample_rate": 44100,
+        "channels": 1,
+        "format": "wav",
+        "tags": [
+          "uploaded"
+        ],
+        "samples": 281856
+      },
+      "processing_history": [],
+      "height": 1,
+      "left": null,
       "right": null
     },
     {
@@ -483,7 +634,68 @@
         "samples": 281856
       },
       "processing_history": [],
-      "height": 4,
+      "height": 2,
+      "left": {
+        "file_id": "aedf2cbf9fbd33a7",
+        "filename": "sample-6s.wav",
+        "file_path": "uploads/sample-6s.wav",
+        "file_size": 1127468,
+        "duration": 6.391292517006803,
+        "sample_rate": 44100,
+        "channels": 1,
+        "bit_depth": 16,
+        "format": "wav",
+        "upload_time": "2025-07-30T13:08:34.026800",
+        "last_accessed": "2025-07-30T13:08:34.026801",
+        "access_count": 1,
+        "tags": [
+          "uploaded"
+        ],
+        "metadata": {
+          "duration": 6.391292517006803,
+          "sample_rate": 44100,
+          "channels": 1,
+          "format": "wav",
+          "tags": [
+            "uploaded"
+          ],
+          "samples": 281856
+        },
+        "processing_history": [],
+        "height": 1,
+        "left": null,
+        "right": null
+      },
+      "right": null
+    },
+    {
+      "file_id": "be2421a0c4e414ec",
+      "filename": "sample-6s.wav",
+      "file_path": "uploads/sample-6s.wav",
+      "file_size": 1127468,
+      "duration": 6.391292517006803,
+      "sample_rate": 44100,
+      "channels": 1,
+      "bit_depth": 16,
+      "format": "wav",
+      "upload_time": "2025-07-30T12:33:22.266455",
+      "last_accessed": "2025-07-30T12:33:22.266457",
+      "access_count": 1,
+      "tags": [
+        "uploaded"
+      ],
+      "metadata": {
+        "duration": 6.391292517006803,
+        "sample_rate": 44100,
+        "channels": 1,
+        "format": "wav",
+        "tags": [
+          "uploaded"
+        ],
+        "samples": 281856
+      },
+      "processing_history": [],
+      "height": 5,
       "left": {
         "file_id": "66e2f4fdb3f5c872",
         "filename": "sample-6s.wav",
@@ -511,7 +723,7 @@
           "samples": 281856
         },
         "processing_history": [],
-        "height": 3,
+        "height": 4,
         "left": {
           "file_id": "561ffc8b0bb32a33",
           "filename": "sample-6s.wav",
@@ -645,7 +857,7 @@
             "samples": 281856
           },
           "processing_history": [],
-          "height": 2,
+          "height": 3,
           "left": {
             "file_id": "76166eca28711845",
             "filename": "sample-3s.wav",
@@ -677,11 +889,71 @@
             "left": null,
             "right": null
           },
-          "right": null
+          "right": {
+            "file_id": "b46824ada1ccd79a",
+            "filename": "sample-6s.wav",
+            "file_path": "uploads/sample-6s.wav",
+            "file_size": 1127468,
+            "duration": 6.391292517006803,
+            "sample_rate": 44100,
+            "channels": 1,
+            "bit_depth": 16,
+            "format": "wav",
+            "upload_time": "2025-07-30T11:31:49.188108",
+            "last_accessed": "2025-07-30T11:31:49.188109",
+            "access_count": 1,
+            "tags": [
+              "uploaded"
+            ],
+            "metadata": {
+              "duration": 6.391292517006803,
+              "sample_rate": 44100,
+              "channels": 1,
+              "format": "wav",
+              "tags": [
+                "uploaded"
+              ],
+              "samples": 281856
+            },
+            "processing_history": [],
+            "height": 2,
+            "left": {
+              "file_id": "aedf2cbf9fbd33a7",
+              "filename": "sample-6s.wav",
+              "file_path": "uploads/sample-6s.wav",
+              "file_size": 1127468,
+              "duration": 6.391292517006803,
+              "sample_rate": 44100,
+              "channels": 1,
+              "bit_depth": 16,
+              "format": "wav",
+              "upload_time": "2025-07-30T13:08:34.026800",
+              "last_accessed": "2025-07-30T13:08:34.026801",
+              "access_count": 1,
+              "tags": [
+                "uploaded"
+              ],
+              "metadata": {
+                "duration": 6.391292517006803,
+                "sample_rate": 44100,
+                "channels": 1,
+                "format": "wav",
+                "tags": [
+                  "uploaded"
+                ],
+                "samples": 281856
+              },
+              "processing_history": [],
+              "height": 1,
+              "left": null,
+              "right": null
+            },
+            "right": null
+          }
         }
       },
       "right": {
-        "file_id": "cfb3b4969b0e4895",
+        "file_id": "dc629d7e9164b2be",
         "filename": "sample-6s.wav",
         "file_path": "uploads/sample-6s.wav",
         "file_size": 1127468,
@@ -690,8 +962,8 @@
         "channels": 1,
         "bit_depth": 16,
         "format": "wav",
-        "upload_time": "2025-07-30T11:47:37.788277",
-        "last_accessed": "2025-07-30T11:47:37.788278",
+        "upload_time": "2025-07-30T12:12:29.091557",
+        "last_accessed": "2025-07-30T12:12:29.091558",
         "access_count": 1,
         "tags": [
           "uploaded"
@@ -709,7 +981,7 @@
         "processing_history": [],
         "height": 3,
         "left": {
-          "file_id": "be2421a0c4e414ec",
+          "file_id": "cfb3b4969b0e4895",
           "filename": "sample-6s.wav",
           "file_path": "uploads/sample-6s.wav",
           "file_size": 1127468,
@@ -718,8 +990,8 @@
           "channels": 1,
           "bit_depth": 16,
           "format": "wav",
-          "upload_time": "2025-07-30T12:33:22.266455",
-          "last_accessed": "2025-07-30T12:33:22.266457",
+          "upload_time": "2025-07-30T11:47:37.788277",
+          "last_accessed": "2025-07-30T11:47:37.788278",
           "access_count": 1,
           "tags": [
             "uploaded"
@@ -767,37 +1039,7 @@
           },
           "processing_history": [],
           "height": 2,
-          "left": {
-            "file_id": "dc629d7e9164b2be",
-            "filename": "sample-6s.wav",
-            "file_path": "uploads/sample-6s.wav",
-            "file_size": 1127468,
-            "duration": 6.391292517006803,
-            "sample_rate": 44100,
-            "channels": 1,
-            "bit_depth": 16,
-            "format": "wav",
-            "upload_time": "2025-07-30T12:12:29.091557",
-            "last_accessed": "2025-07-30T12:12:29.091558",
-            "access_count": 1,
-            "tags": [
-              "uploaded"
-            ],
-            "metadata": {
-              "duration": 6.391292517006803,
-              "sample_rate": 44100,
-              "channels": 1,
-              "format": "wav",
-              "tags": [
-                "uploaded"
-              ],
-              "samples": 281856
-            },
-            "processing_history": [],
-            "height": 1,
-            "left": null,
-            "right": null
-          },
+          "left": null,
           "right": {
             "file_id": "fe8e013bbe56a94e",
             "filename": "sample-6s.wav",
@@ -848,37 +1090,6 @@
       }
     },
     {
-      "file_id": "be2421a0c4e414ec",
-      "filename": "sample-6s.wav",
-      "file_path": "uploads/sample-6s.wav",
-      "file_size": 1127468,
-      "duration": 6.391292517006803,
-      "sample_rate": 44100,
-      "channels": 1,
-      "bit_depth": 16,
-      "format": "wav",
-      "upload_time": "2025-07-30T12:33:22.266455",
-      "last_accessed": "2025-07-30T12:33:22.266457",
-      "access_count": 1,
-      "tags": [
-        "uploaded"
-      ],
-      "metadata": {
-        "duration": 6.391292517006803,
-        "sample_rate": 44100,
-        "channels": 1,
-        "format": "wav",
-        "tags": [
-          "uploaded"
-        ],
-        "samples": 281856
-      },
-      "processing_history": [],
-      "height": 1,
-      "left": null,
-      "right": null
-    },
-    {
       "file_id": "cfb3b4969b0e4895",
       "filename": "sample-6s.wav",
       "file_path": "uploads/sample-6s.wav",
@@ -905,9 +1116,40 @@
         "samples": 281856
       },
       "processing_history": [],
+      "height": 1,
+      "left": null,
+      "right": null
+    },
+    {
+      "file_id": "dc629d7e9164b2be",
+      "filename": "sample-6s.wav",
+      "file_path": "uploads/sample-6s.wav",
+      "file_size": 1127468,
+      "duration": 6.391292517006803,
+      "sample_rate": 44100,
+      "channels": 1,
+      "bit_depth": 16,
+      "format": "wav",
+      "upload_time": "2025-07-30T12:12:29.091557",
+      "last_accessed": "2025-07-30T12:12:29.091558",
+      "access_count": 1,
+      "tags": [
+        "uploaded"
+      ],
+      "metadata": {
+        "duration": 6.391292517006803,
+        "sample_rate": 44100,
+        "channels": 1,
+        "format": "wav",
+        "tags": [
+          "uploaded"
+        ],
+        "samples": 281856
+      },
+      "processing_history": [],
       "height": 3,
       "left": {
-        "file_id": "be2421a0c4e414ec",
+        "file_id": "cfb3b4969b0e4895",
         "filename": "sample-6s.wav",
         "file_path": "uploads/sample-6s.wav",
         "file_size": 1127468,
@@ -916,8 +1158,8 @@
         "channels": 1,
         "bit_depth": 16,
         "format": "wav",
-        "upload_time": "2025-07-30T12:33:22.266455",
-        "last_accessed": "2025-07-30T12:33:22.266457",
+        "upload_time": "2025-07-30T11:47:37.788277",
+        "last_accessed": "2025-07-30T11:47:37.788278",
         "access_count": 1,
         "tags": [
           "uploaded"
@@ -965,37 +1207,7 @@
         },
         "processing_history": [],
         "height": 2,
-        "left": {
-          "file_id": "dc629d7e9164b2be",
-          "filename": "sample-6s.wav",
-          "file_path": "uploads/sample-6s.wav",
-          "file_size": 1127468,
-          "duration": 6.391292517006803,
-          "sample_rate": 44100,
-          "channels": 1,
-          "bit_depth": 16,
-          "format": "wav",
-          "upload_time": "2025-07-30T12:12:29.091557",
-          "last_accessed": "2025-07-30T12:12:29.091558",
-          "access_count": 1,
-          "tags": [
-            "uploaded"
-          ],
-          "metadata": {
-            "duration": 6.391292517006803,
-            "sample_rate": 44100,
-            "channels": 1,
-            "format": "wav",
-            "tags": [
-              "uploaded"
-            ],
-            "samples": 281856
-          },
-          "processing_history": [],
-          "height": 1,
-          "left": null,
-          "right": null
-        },
+        "left": null,
         "right": {
           "file_id": "fe8e013bbe56a94e",
           "filename": "sample-6s.wav",
@@ -1045,37 +1257,6 @@
       }
     },
     {
-      "file_id": "dc629d7e9164b2be",
-      "filename": "sample-6s.wav",
-      "file_path": "uploads/sample-6s.wav",
-      "file_size": 1127468,
-      "duration": 6.391292517006803,
-      "sample_rate": 44100,
-      "channels": 1,
-      "bit_depth": 16,
-      "format": "wav",
-      "upload_time": "2025-07-30T12:12:29.091557",
-      "last_accessed": "2025-07-30T12:12:29.091558",
-      "access_count": 1,
-      "tags": [
-        "uploaded"
-      ],
-      "metadata": {
-        "duration": 6.391292517006803,
-        "sample_rate": 44100,
-        "channels": 1,
-        "format": "wav",
-        "tags": [
-          "uploaded"
-        ],
-        "samples": 281856
-      },
-      "processing_history": [],
-      "height": 1,
-      "left": null,
-      "right": null
-    },
-    {
       "file_id": "f34dcf247a1a50e5",
       "filename": "sample-6s.wav",
       "file_path": "uploads/sample-6s.wav",
@@ -1103,37 +1284,7 @@
       },
       "processing_history": [],
       "height": 2,
-      "left": {
-        "file_id": "dc629d7e9164b2be",
-        "filename": "sample-6s.wav",
-        "file_path": "uploads/sample-6s.wav",
-        "file_size": 1127468,
-        "duration": 6.391292517006803,
-        "sample_rate": 44100,
-        "channels": 1,
-        "bit_depth": 16,
-        "format": "wav",
-        "upload_time": "2025-07-30T12:12:29.091557",
-        "last_accessed": "2025-07-30T12:12:29.091558",
-        "access_count": 1,
-        "tags": [
-          "uploaded"
-        ],
-        "metadata": {
-          "duration": 6.391292517006803,
-          "sample_rate": 44100,
-          "channels": 1,
-          "format": "wav",
-          "tags": [
-            "uploaded"
-          ],
-          "samples": 281856
-        },
-        "processing_history": [],
-        "height": 1,
-        "left": null,
-        "right": null
-      },
+      "left": null,
       "right": {
         "file_id": "fe8e013bbe56a94e",
         "filename": "sample-6s.wav",
@@ -1229,11 +1380,11 @@
     }
   ],
   "statistics": {
-    "total_files": 12,
-    "total_size": 12965904,
-    "cache_size": 12,
-    "tree_height": 4,
-    "average_file_size": 1080492.0
+    "total_files": 13,
+    "total_size": 14093372,
+    "cache_size": 13,
+    "tree_height": 5,
+    "average_file_size": 1084105.5384615385
   },
-  "last_updated": "2025-07-30T12:38:48.735566"
+  "last_updated": "2025-07-30T13:08:34.027757"
 }

@@ -18,10 +18,10 @@ import numpy as np
 from app.core.dependencies import get_db_session, get_audio_manager, get_audio_buffer_manager
 from app.core.errors import SessionNotFoundError, AudioProcessingFailedError, EffectNotSupportedError
 from app.models.pydantic import (
-    CreateSessionRequest, ProcessAudioRequest, BatchProcessRequest,
+    CreateSessionRequest, ProcessAudioRequest,
     AudioSessionResponse, BufferStatusResponse, ProcessingResultResponse,
-    AudioFileResponse, AudioAnalysisResponse, AudioFeaturesResponse,
-    HealthCheckResponse, StatisticsResponse, SearchFilesRequest
+    AudioFileResponse, AudioAnalysisResponse,
+    HealthCheckResponse, StatisticsResponse
 )
 from app.services.audio_processor import AudioProcessorFactory
 from app.models.db import AudioSession, ProcessingHistory, AudioFile
