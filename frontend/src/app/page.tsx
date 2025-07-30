@@ -258,6 +258,22 @@ export default function Home() {
         const data = await response.json()
         console.log(`✅ Successfully applied ${effect}:`, data)
         toast.success(`${effect} effect applied successfully!`)
+        
+        // Update the audio analysis with new processing results
+        setAudioAnalysis((prev: any) => ({
+          ...prev,
+          lastProcessedEffect: effect,
+          processedSamples: data.processed,
+          processedFile: data.processed_file,
+          sessionId: data.session_id,
+          processingHistory: [...(prev?.processingHistory || []), {
+            effect,
+            timestamp: new Date().toISOString(),
+            samplesProcessed: data.processed
+          }]
+        }))
+        
+        toast.success(`${effect} effect applied successfully! Listen to the result below.`)
       } else {
         const errorText = await response.text()
         console.error(`❌ Server error: ${response.status} - ${errorText}`)
@@ -306,6 +322,32 @@ export default function Home() {
   const removeEffect = (effect: string) => {
     setActiveEffects(prev => prev.filter(e => e !== effect))
     toast.success(`${effect} effect removed`)
+  }
+
+  const playProcessedAudio = async (sessionId: string, effect: string) => {
+    try {
+      const audioUrl = `http://localhost:8000/api/audio/processed/${sessionId}/${effect}`
+      console.log(`🎵 Playing processed audio: ${audioUrl}`)
+      
+      // Create a new audio element for the processed audio
+      const audio = new Audio(audioUrl)
+      audio.volume = volume
+      
+      audio.onloadeddata = () => {
+        console.log(`✅ Processed audio loaded: ${effect}`)
+        toast.success(`Playing ${effect} processed audio`)
+      }
+      
+      audio.onerror = (error) => {
+        console.error(`❌ Error playing processed audio:`, error)
+        toast.error(`Error playing ${effect} audio`)
+      }
+      
+      await audio.play()
+    } catch (error) {
+      console.error(`❌ Error playing processed audio:`, error)
+      toast.error(`Error playing ${effect} audio`)
+    }
   }
 
   const analyzeAudio = async () => {
@@ -736,6 +778,80 @@ export default function Home() {
                     <div>Applied Effects: {activeEffects.join(', ')}</div>
                     <div>Session ID: {sessionId}</div>
                     <div>Status: {isProcessing ? 'Processing...' : 'Ready'}</div>
+                    {audioAnalysis?.lastProcessedEffect && (
+                      <div>Last Effect: {audioAnalysis.lastProcessedEffect}</div>
+                    )}
+                    {audioAnalysis?.processedSamples && (
+                      <div>Samples Processed: {audioAnalysis.processedSamples.toLocaleString()}</div>
+                    )}
+                  </div>
+                  
+                  {/* Processing History */}
+                  {audioAnalysis?.processingHistory && audioAnalysis.processingHistory.length > 0 && (
+                    <div className="mt-3">
+                      <h5 className="text-xs font-medium text-blue-300 mb-1">Processing History:</h5>
+                      <div className="space-y-1 max-h-20 overflow-y-auto">
+                        {audioAnalysis.processingHistory.slice(-3).map((item: any, index: number) => (
+                          <div key={index} className="text-xs text-gray-400">
+                            {item.effect} - {item.samplesProcessed.toLocaleString()} samples
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Processed Audio Player */}
+              {audioAnalysis?.processedFile && audioAnalysis?.lastProcessedEffect && (
+                <div className="mt-4 p-3 bg-purple-500/10 border border-purple-500/20 rounded-lg">
+                  <h4 className="text-sm font-medium text-purple-400 mb-3">
+                    🎵 Processed Audio: {audioAnalysis.lastProcessedEffect}
+                  </h4>
+                  
+                  <div className="space-y-3">
+                    {/* Audio Player */}
+                    <div className="flex items-center space-x-2">
+                      <audio 
+                        controls 
+                        className="flex-1"
+                        src={`http://localhost:8000/api/audio/processed/${audioAnalysis.sessionId}/${audioAnalysis.lastProcessedEffect}`}
+                      >
+                        Your browser does not support the audio element.
+                      </audio>
+                      
+                      <button
+                        onClick={() => playProcessedAudio(audioAnalysis.sessionId, audioAnalysis.lastProcessedEffect)}
+                        className="px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors duration-200"
+                        title="Play with Web Audio API"
+                      >
+                        <PlayIcon className="h-4 w-4" />
+                      </button>
+                    </div>
+                    
+                    {/* Download Link */}
+                    <div className="flex items-center justify-between">
+                      <div className="text-xs text-gray-400">
+                        <div>Effect: {audioAnalysis.lastProcessedEffect}</div>
+                        <div>Samples: {audioAnalysis.processedSamples?.toLocaleString()}</div>
+                        <div>File: {audioAnalysis.processedFile}</div>
+                      </div>
+                      
+                      <a 
+                        href={`http://localhost:8000/api/audio/processed/${audioAnalysis.sessionId}/${audioAnalysis.lastProcessedEffect}`}
+                        download={`processed_${audioAnalysis.lastProcessedEffect}.wav`}
+                        className="px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white text-xs rounded-lg transition-colors duration-200"
+                      >
+                        Download
+                      </a>
+                    </div>
+                    
+                    {/* Waveform Visualization Placeholder */}
+                    <div className="h-16 bg-gray-800 rounded-lg border border-gray-700 flex items-center justify-center">
+                      <div className="text-xs text-gray-500">
+                        Waveform visualization for {audioAnalysis.lastProcessedEffect} effect
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}

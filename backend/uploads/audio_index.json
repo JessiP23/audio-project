@@ -1,0 +1,149 @@
+{
+  "files": [
+    {
+      "file_id": "561ffc8b0bb32a33",
+      "filename": "sample-6s.wav",
+      "file_path": "uploads/sample-6s.wav",
+      "file_size": 1127468,
+      "duration": 6.391292517006803,
+      "sample_rate": 44100,
+      "channels": 1,
+      "bit_depth": 16,
+      "format": "wav",
+      "upload_time": "2025-07-30T00:16:14.079495",
+      "last_accessed": "2025-07-30T00:16:20.016735",
+      "access_count": 2,
+      "tags": [
+        "uploaded",
+        "processed"
+      ],
+      "metadata": {
+        "duration": 6.391292517006803,
+        "sample_rate": 44100,
+        "channels": 1,
+        "format": "wav",
+        "tags": [
+          "uploaded",
+          "processed"
+        ],
+        "samples": 281856
+      },
+      "processing_history": [
+        {
+          "timestamp": "2025-07-30T00:16:20.016739",
+          "effect": "reverb",
+          "parameters": {
+            "room_size": 0.5,
+            "damping": 0.5
+          },
+          "result": {
+            "processed": 281856,
+            "effect": "reverb"
+          }
+        }
+      ],
+      "height": 2,
+      "left": null,
+      "right": {
+        "file_id": "fe8e013bbe56a94e",
+        "filename": "sample-6s.wav",
+        "file_path": "uploads/sample-6s.wav",
+        "file_size": 1127468,
+        "duration": 6.391292517006803,
+        "sample_rate": 44100,
+        "channels": 1,
+        "bit_depth": 16,
+        "format": "wav",
+        "upload_time": "2025-07-30T00:25:13.124273",
+        "last_accessed": "2025-07-30T00:25:17.898020",
+        "access_count": 2,
+        "tags": [
+          "uploaded",
+          "processed"
+        ],
+        "metadata": {
+          "duration": 6.391292517006803,
+          "sample_rate": 44100,
+          "channels": 1,
+          "format": "wav",
+          "tags": [
+            "uploaded",
+            "processed"
+          ],
+          "samples": 281856
+        },
+        "processing_history": [
+          {
+            "timestamp": "2025-07-30T00:25:17.898023",
+            "effect": "reverb",
+            "parameters": {
+              "room_size": 0.5,
+              "damping": 0.5
+            },
+            "result": {
+              "processed": 281856,
+              "effect": "reverb"
+            }
+          }
+        ],
+        "height": 1,
+        "left": null,
+        "right": null
+      }
+    },
+    {
+      "file_id": "fe8e013bbe56a94e",
+      "filename": "sample-6s.wav",
+      "file_path": "uploads/sample-6s.wav",
+      "file_size": 1127468,
+      "duration": 6.391292517006803,
+      "sample_rate": 44100,
+      "channels": 1,
+      "bit_depth": 16,
+      "format": "wav",
+      "upload_time": "2025-07-30T00:25:13.124273",
+      "last_accessed": "2025-07-30T00:25:17.898020",
+      "access_count": 2,
+      "tags": [
+        "uploaded",
+        "processed"
+      ],
+      "metadata": {
+        "duration": 6.391292517006803,
+        "sample_rate": 44100,
+        "channels": 1,
+        "format": "wav",
+        "tags": [
+          "uploaded",
+          "processed"
+        ],
+        "samples": 281856
+      },
+      "processing_history": [
+        {
+          "timestamp": "2025-07-30T00:25:17.898023",
+          "effect": "reverb",
+          "parameters": {
+            "room_size": 0.5,
+            "damping": 0.5
+          },
+          "result": {
+            "processed": 281856,
+            "effect": "reverb"
+          }
+        }
+      ],
+      "height": 1,
+      "left": null,
+      "right": null
+    }
+  ],
+  "statistics": {
+    "total_files": 2,
+    "total_size": 2254936,
+    "cache_size": 2,
+    "tree_height": 2,
+    "average_file_size": 1127468.0
+  },
+  "last_updated": "2025-07-30T00:25:17.898153"
+}

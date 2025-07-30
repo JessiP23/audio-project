@@ -1,6 +1,7 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 import json
 import asyncio
@@ -15,6 +16,7 @@ from audio_buffer import AudioBuffer
 from audio_processor import AudioProcessor
 from database import get_db, init_db, AsyncSessionLocal
 from models import AudioSession, ProcessingHistory
+from audio_manager import audio_manager
 
 # Pydantic models for request validation
 class ProcessAudioRequest(BaseModel):
@@ -48,6 +50,9 @@ app.add_middleware(
 
 # Create uploads directory
 os.makedirs("uploads", exist_ok=True)
+
+# Mount static files
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 # Global audio buffers and processors
 audio_buffers: Dict[str, AudioBuffer] = {}
@@ -192,6 +197,16 @@ async def process_audio(session_id: str, request: ProcessAudioRequest):
     buffer.write(processed_samples)
     logger.debug(f"Wrote {len(processed_samples)} processed samples back to buffer")
     
+    # Save processed audio to file for playback
+    try:
+        import soundfile as sf
+        processed_file_path = f"uploads/processed_{session_id}_{request.effect}.wav"
+        sf.write(processed_file_path, processed_samples, 44100)
+        logger.info(f"Processed audio saved to: {processed_file_path}")
+    except Exception as e:
+        logger.error(f"Error saving processed audio: {e}")
+        processed_file_path = None
+    
     # Log processing history
     try:
         from database import AsyncSessionLocal
@@ -209,8 +224,26 @@ async def process_audio(session_id: str, request: ProcessAudioRequest):
         logger.error(f"Database error in process_audio: {e}")
         # Continue without database logging if there's an error
     
+    # Update AVL tree processing history
+    try:
+        await audio_manager.update_processing_history(
+            session_id, 
+            request.effect, 
+            request.parameters, 
+            {"processed": len(processed_samples), "effect": request.effect}
+        )
+        logger.debug(f"AVL tree processing history updated")
+    except Exception as e:
+        logger.error(f"AVL tree error in process_audio: {e}")
+        # Continue without AVL tree logging if there's an error
+    
     logger.info(f"Audio processing completed successfully for session {session_id}")
-    return {"processed": len(processed_samples), "effect": request.effect}
+    return {
+        "processed": len(processed_samples), 
+        "effect": request.effect,
+        "processed_file": processed_file_path,
+        "session_id": session_id
+    }
 
 @app.websocket("/ws/audio/{session_id}")
 async def websocket_endpoint(websocket: WebSocket, session_id: str):
@@ -302,8 +335,33 @@ async def upload_audio_file(file: UploadFile = File(...)):
         logger.error(f"Error loading audio file: {e}")
         raise HTTPException(status_code=500, detail="Error loading audio file")
     
-    # Create a new session for this file
-    session_id = f"file_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+    # Add to AVL tree manager
+    try:
+        # Convert samples to numpy array for shape analysis
+        import numpy as np
+        samples_array = np.array(samples)
+        
+        metadata = {
+            'duration': len(samples) / 44100,
+            'sample_rate': 44100,
+            'channels': 1 if len(samples_array.shape) == 1 else samples_array.shape[1],
+            'format': file.filename.split('.')[-1],
+            'tags': ['uploaded', 'processed'],
+            'samples': len(samples)
+        }
+        
+        audio_file_node = await audio_manager.add_audio_file(file_path, metadata)
+        session_id = audio_file_node.file_id
+        
+        logger.info(f"Added file to AVL tree: {session_id}")
+        
+    except Exception as e:
+        logger.error(f"Error adding to AVL tree: {e}")
+        # Fallback to original session ID generation if AVL tree fails
+        session_id = f"file_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        logger.warning(f"AVL tree failed, using fallback session ID: {session_id}")
+    
+    # Create audio buffer and processor
     audio_buffers[session_id] = AudioBuffer(size=len(samples))
     audio_processors[session_id] = AudioProcessor()
     
@@ -321,7 +379,8 @@ async def upload_audio_file(file: UploadFile = File(...)):
         "session_id": session_id,
         "filename": file.filename,
         "samples": len(samples),
-        "duration": duration
+        "duration": duration,
+        "file_id": session_id
     }
 
 @app.post("/api/audio/{session_id}/analyze")
@@ -486,12 +545,110 @@ async def list_sessions():
 @app.delete("/api/audio/{session_id}")
 async def delete_session(session_id: str):
     """Delete an audio session and clean up resources."""
+    # Delete from AVL tree
+    success = await audio_manager.delete_audio_file(session_id)
+    
+    # Delete from memory
     if session_id in audio_buffers:
         del audio_buffers[session_id]
     if session_id in audio_processors:
         del audio_processors[session_id]
     
-    return {"message": f"Session {session_id} deleted successfully"}
+    if success:
+        return {"message": f"Session {session_id} deleted successfully"}
+    else:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+@app.get("/api/audio/files")
+async def list_audio_files(query: str = "", tags: str = "", limit: int = 100):
+    """List all audio files with optional filtering."""
+    try:
+        tag_list = tags.split(',') if tags else None
+        files = await audio_manager.search_files(query, tag_list, limit)
+        
+        return {
+            "files": [
+                {
+                    "file_id": file.file_id,
+                    "filename": file.filename,
+                    "duration": file.duration,
+                    "file_size": file.file_size,
+                    "upload_time": file.upload_time,
+                    "access_count": file.access_count,
+                    "tags": file.tags
+                }
+                for file in files
+            ],
+            "total": len(files),
+            "query": query,
+            "tags": tag_list
+        }
+    except Exception as e:
+        logger.error(f"Error listing files: {e}")
+        raise HTTPException(status_code=500, detail="Error listing files")
+
+@app.get("/api/audio/files/popular")
+async def get_popular_files(limit: int = 10):
+    """Get most accessed audio files."""
+    try:
+        files = await audio_manager.get_popular_files(limit)
+        return {
+            "files": [
+                {
+                    "file_id": file.file_id,
+                    "filename": file.filename,
+                    "access_count": file.access_count,
+                    "duration": file.duration
+                }
+                for file in files
+            ]
+        }
+    except Exception as e:
+        logger.error(f"Error getting popular files: {e}")
+        raise HTTPException(status_code=500, detail="Error getting popular files")
+
+@app.get("/api/audio/files/recent")
+async def get_recent_files(limit: int = 10):
+    """Get recently uploaded audio files."""
+    try:
+        files = await audio_manager.get_recent_files(limit)
+        return {
+            "files": [
+                {
+                    "file_id": file.file_id,
+                    "filename": file.filename,
+                    "upload_time": file.upload_time,
+                    "duration": file.duration
+                }
+                for file in files
+            ]
+        }
+    except Exception as e:
+        logger.error(f"Error getting recent files: {e}")
+        raise HTTPException(status_code=500, detail="Error getting recent files")
+
+@app.get("/api/audio/statistics")
+async def get_audio_statistics():
+    """Get audio file management statistics."""
+    try:
+        stats = audio_manager.get_statistics()
+        return stats
+    except Exception as e:
+        logger.error(f"Error getting statistics: {e}")
+        raise HTTPException(status_code=500, detail="Error getting statistics")
+
+@app.get("/api/audio/processed/{session_id}/{effect}")
+async def get_processed_audio(session_id: str, effect: str):
+    """Get processed audio file for a specific session and effect."""
+    try:
+        file_path = f"uploads/processed_{session_id}_{effect}.wav"
+        if os.path.exists(file_path):
+            return FileResponse(file_path, media_type="audio/wav")
+        else:
+            raise HTTPException(status_code=404, detail="Processed audio file not found")
+    except Exception as e:
+        logger.error(f"Error serving processed audio: {e}")
+        raise HTTPException(status_code=500, detail="Error serving processed audio")
 
 if __name__ == "__main__":
     import uvicorn
